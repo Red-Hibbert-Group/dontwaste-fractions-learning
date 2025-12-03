@@ -515,21 +515,27 @@ app.post('/api/games/save-game-state', (req, res) => {
 app.post('/api/save-wasted-time', (req, res) => {
   try {
     const { sessionId, wastedTime } = req.body;
-    
+
     // Create wasted_time table if it doesn't exist
     db.exec(`
       CREATE TABLE IF NOT EXISTS wasted_time (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         session_id TEXT NOT NULL,
         wasted_time INTEGER DEFAULT 0,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (session_id) REFERENCES sessions(session_id)
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       );
     `);
-    
+
+    // Ensure session exists in sessions table
+    const session = db.prepare('SELECT session_id FROM sessions WHERE session_id = ?').get(sessionId);
+    if (!session) {
+      // Create session if it doesn't exist
+      db.prepare('INSERT OR IGNORE INTO sessions (session_id) VALUES (?)').run(sessionId);
+    }
+
     // Check if record exists
     const existing = db.prepare('SELECT id FROM wasted_time WHERE session_id = ?').get(sessionId);
-    
+
     if (existing) {
       const stmt = db.prepare('UPDATE wasted_time SET wasted_time = ?, updated_at = CURRENT_TIMESTAMP WHERE session_id = ?');
       stmt.run(wastedTime, sessionId);
@@ -537,10 +543,133 @@ app.post('/api/save-wasted-time', (req, res) => {
       const stmt = db.prepare('INSERT INTO wasted_time (session_id, wasted_time) VALUES (?, ?)');
       stmt.run(sessionId, wastedTime);
     }
-    
+
     res.json({ success: true });
   } catch (error) {
     console.error('Error saving wasted time:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Save enhanced focus data
+app.post('/api/save-focus-data', (req, res) => {
+  try {
+    const {
+      sessionId,
+      focusScore,
+      wastedTime,
+      focusedTime,
+      totalTime,
+      focusStreak,
+      longestStreak,
+      distractionCount,
+    } = req.body;
+
+    // Create focus_data table if it doesn't exist
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS focus_data (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        session_id TEXT NOT NULL,
+        focus_score INTEGER DEFAULT 0,
+        wasted_time INTEGER DEFAULT 0,
+        focused_time INTEGER DEFAULT 0,
+        total_time INTEGER DEFAULT 0,
+        focus_streak INTEGER DEFAULT 0,
+        longest_streak INTEGER DEFAULT 0,
+        distraction_count INTEGER DEFAULT 0,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Ensure session exists
+    const session = db.prepare('SELECT session_id FROM sessions WHERE session_id = ?').get(sessionId);
+    if (!session) {
+      db.prepare('INSERT OR IGNORE INTO sessions (session_id) VALUES (?)').run(sessionId);
+    }
+
+    // Check if focus data exists
+    const existing = db.prepare('SELECT id FROM focus_data WHERE session_id = ?').get(sessionId);
+
+    if (existing) {
+      const stmt = db.prepare(`
+        UPDATE focus_data
+        SET focus_score = ?, wasted_time = ?, focused_time = ?, total_time = ?,
+            focus_streak = ?, longest_streak = ?, distraction_count = ?,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE session_id = ?
+      `);
+      stmt.run(
+        focusScore,
+        wastedTime,
+        focusedTime,
+        totalTime,
+        focusStreak,
+        longestStreak,
+        distractionCount,
+        sessionId
+      );
+    } else {
+      const stmt = db.prepare(`
+        INSERT INTO focus_data
+        (session_id, focus_score, wasted_time, focused_time, total_time,
+         focus_streak, longest_streak, distraction_count)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      stmt.run(
+        sessionId,
+        focusScore,
+        wastedTime,
+        focusedTime,
+        totalTime,
+        focusStreak,
+        longestStreak,
+        distractionCount
+      );
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error saving focus data:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get focus analytics
+app.get('/api/focus-analytics/:sessionId', (req, res) => {
+  try {
+    const { sessionId } = req.params;
+
+    const focusData = db.prepare('SELECT * FROM focus_data WHERE session_id = ?').get(sessionId);
+
+    if (!focusData) {
+      return res.json({
+        success: true,
+        data: {
+          focusScore: 100,
+          wastedTime: 0,
+          focusedTime: 0,
+          totalTime: 0,
+          focusStreak: 0,
+          longestStreak: 0,
+          distractionCount: 0,
+          focusPercentage: 100,
+        },
+      });
+    }
+
+    const focusPercentage = focusData.total_time > 0
+      ? Math.round((focusData.focused_time / focusData.total_time) * 100)
+      : 100;
+
+    res.json({
+      success: true,
+      data: {
+        ...focusData,
+        focusPercentage,
+      },
+    });
+  } catch (error) {
+    console.error('Error getting focus analytics:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -549,7 +678,7 @@ app.post('/api/save-wasted-time', (req, res) => {
 app.get('/api/leaderboard/:gameType', (req, res) => {
   try {
     const { gameType } = req.params;
-    
+
     const stmt = db.prepare(`
       SELECT session_id, MAX(score) as max_score, COUNT(*) as games_played
       FROM game_sessions
@@ -558,9 +687,9 @@ app.get('/api/leaderboard/:gameType', (req, res) => {
       ORDER BY max_score DESC
       LIMIT 10
     `);
-    
+
     const leaderboard = stmt.all(gameType);
-    
+
     res.json({ success: true, leaderboard });
   } catch (error) {
     console.error("Error getting leaderboard:", error);

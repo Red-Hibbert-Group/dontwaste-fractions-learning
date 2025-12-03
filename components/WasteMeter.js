@@ -50,22 +50,23 @@ export default function WasteMeter() {
 
   const loadFaceModel = async () => {
     if (typeof window === 'undefined') return
-    
+
     try {
       // Dynamically import TensorFlow modules
       const tf = await import('@tensorflow/tfjs')
+      await tf.setBackend('webgl')
       await tf.ready()
-      
+
       const faceDetectionModule = await import('@tensorflow-models/face-landmarks-detection')
       faceLandmarksDetection = faceDetectionModule
-      
+
       const model = faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh
       const detectorConfig = {
-        runtime: 'mediapipe',
-        solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh',
-        refineLandmarks: true,
+        runtime: 'tfjs',
+        maxFaces: 1,
+        refineLandmarks: false,
       }
-      
+
       const detector = await faceLandmarksDetection.createDetector(model, detectorConfig)
       modelRef.current = detector
       console.log('Face detection model loaded - Eye tracking enabled')
@@ -73,6 +74,7 @@ export default function WasteMeter() {
       console.error('Error loading face detection model:', error)
       console.log('Falling back to motion detection')
       // Continue without eye tracking - will use fallback methods
+      modelRef.current = null
     }
   }
 
@@ -114,7 +116,7 @@ export default function WasteMeter() {
 
     const video = videoRef.current
     const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
 
     // Set canvas size to match video
     if (video.videoWidth > 0 && video.videoHeight > 0) {

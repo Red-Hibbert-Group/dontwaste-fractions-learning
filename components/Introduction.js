@@ -19,7 +19,6 @@ export default function Introduction() {
     timerRef.current = setInterval(() => {
       setTimeElapsed((prev) => {
         const newTime = prev + 1
-        updateTimeSpent()
         if (newTime >= targetTime) {
           setIsComplete(true)
           return targetTime
@@ -33,7 +32,16 @@ export default function Introduction() {
         clearInterval(timerRef.current)
       }
     }
-  }, [targetTime, updateTimeSpent])
+  }, [targetTime])
+
+  // Separate effect for updating time spent
+  useEffect(() => {
+    const interval = setInterval(() => {
+      updateTimeSpent()
+    }, 5000) // Update every 5 seconds instead of every second
+
+    return () => clearInterval(interval)
+  }, [updateTimeSpent])
 
   const handleActivityComplete = () => {
     setIsComplete(true)

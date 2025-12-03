@@ -8,7 +8,12 @@ import Assessment from '@/components/Assessment'
 import Dashboard from '@/components/Dashboard'
 import GamesMenu from '@/components/GamesMenu'
 import WasteMeter from '@/components/WasteMeter'
+import EnhancedFocusMeter from '@/components/EnhancedFocusMeter'
 import { useAppStore } from '@/store/appStore'
+
+// 🎯 Toggle between meters: 'original' or 'enhanced'
+// Change this to easily test both versions!
+const USE_METER = 'enhanced' // Try: 'original' or 'enhanced'
 
 export default function Home() {
   const { currentPhase, sessionId, initializeSession } = useAppStore()
@@ -42,9 +47,9 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {renderPhase()}
-      {/* Show waste meter on all pages except landing and dashboard */}
+      {/* Show focus meter on all pages except landing and dashboard */}
       {currentPhase !== 'landing' && currentPhase !== 'dashboard' && (
-        <WasteMeter />
+        USE_METER === 'enhanced' ? <EnhancedFocusMeter /> : <WasteMeter />
       )}
     </main>
   )

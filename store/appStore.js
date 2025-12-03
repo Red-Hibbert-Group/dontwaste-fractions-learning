@@ -23,7 +23,12 @@ export const useAppStore = create(
       // Initialize session
       initializeSession: async () => {
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/create-session`)
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/create-session`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
           const data = await response.json()
           if (data.success) {
             set({ sessionId: data.sessionId, startTime: Date.now() })
