@@ -10,7 +10,7 @@ TimeBack Learning now features a **complete adaptive learning system** that rest
 ### 1. Streamlined Onboarding Flow
 **Created:**
 - [components/NameInput.js](components/NameInput.js) - Simple name collection screen
-- [components/WelcomeMessage.js](components/WelcomeMessage.js) - Personalized greeting after assessment
+- [components/WelcomeMessage.js](components/WelcomeMessage.js) - Personalized greeting after assessment 
 
 **Flow:**
 ```
