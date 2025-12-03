@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEnhancedStore } from '@/store/enhancedAppStore'
 import confetti from 'canvas-confetti'
+import TextToSpeech from '@/components/TextToSpeech'
+import AIGuru from '@/components/AIGuru'
 
 const ASSESSMENT_QUESTIONS = [
   {
@@ -338,7 +340,14 @@ export default function PreAssessment({ onComplete }) {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Pre-Assessment</h1>
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-3xl font-bold text-gray-800">Pre-Assessment</h1>
+            <TextToSpeech
+              text={question.question + ' Options: ' + question.options.join(', ')}
+              rate={0.85}
+              key={currentQuestion}
+            />
+          </div>
           <p className="text-gray-600 mb-4">
             Let&apos;s see what you already know! This helps us personalize your learning.
           </p>
@@ -418,6 +427,12 @@ export default function PreAssessment({ onComplete }) {
             </div>
           </motion.div>
         </AnimatePresence>
+
+        {/* AI Guru Assistant */}
+        <AIGuru
+          context={question.question + ' Options: ' + question.options.join(', ')}
+          pageType="assessment"
+        />
       </div>
     </div>
   )

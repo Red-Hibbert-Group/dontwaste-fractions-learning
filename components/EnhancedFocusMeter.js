@@ -64,6 +64,11 @@ export default function EnhancedFocusMeter() {
   const [showEncouragement, setShowEncouragement] = useState(false)
   const [encouragementMessage, setEncouragementMessage] = useState('')
 
+  // Auto-pause feature
+  const [isPaused, setIsPaused] = useState(false)
+  const [pauseCountdown, setPauseCountdown] = useState(0)
+  const [showPauseOverlay, setShowPauseOverlay] = useState(false)
+
   // Refs
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
@@ -265,6 +270,31 @@ export default function EnhancedFocusMeter() {
       a => now - a.timestamp < 10000
     )
     const engagementRatio = recentActivity.filter(a => a.type === 'engaged').length / Math.max(recentActivity.length, 1)
+
+    // Auto-pause logic: Trigger pause after 60 seconds of inactivity
+    const PAUSE_THRESHOLD = 60000 // 60 seconds
+    const PAUSE_WARNING_THRESHOLD = 57000 // 57 seconds (show warning)
+
+    if (timeSinceActivity > PAUSE_THRESHOLD && !isPaused) {
+      // Trigger auto-pause
+      setIsPaused(true)
+      setShowPauseOverlay(true)
+      setPauseCountdown(Math.floor(timeSinceActivity / 1000))
+      console.log('⏸️ Auto-pause triggered after', Math.floor(timeSinceActivity / 1000), 'seconds of inactivity')
+    } else if (timeSinceActivity > PAUSE_WARNING_THRESHOLD && !isPaused) {
+      // Show warning countdown
+      const countdown = Math.ceil((PAUSE_THRESHOLD - timeSinceActivity) / 1000)
+      setPauseCountdown(countdown)
+    } else if (timeSinceActivity <= PAUSE_WARNING_THRESHOLD) {
+      // Reset countdown
+      setPauseCountdown(0)
+      if (isPaused) {
+        // Resume from pause
+        setIsPaused(false)
+        setShowPauseOverlay(false)
+        console.log('▶️ Activity resumed')
+      }
+    }
 
     // Calculate focus score (0-100) with more sensitive thresholds
     let newFocusScore = 100
@@ -541,6 +571,78 @@ export default function EnhancedFocusMeter() {
           >
             <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-4 rounded-2xl shadow-2xl">
               <div className="text-lg font-bold text-center">{encouragementMessage}</div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Auto-Pause Overlay */}
+      <AnimatePresence>
+        {showPauseOverlay && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="bg-white rounded-3xl shadow-2xl p-8 max-w-md mx-4 text-center"
+            >
+              <div className="text-6xl mb-4">⏸️</div>
+              <h2 className="text-3xl font-bold text-gray-800 mb-3">
+                Activity Paused
+              </h2>
+              <p className="text-gray-600 mb-6">
+                We noticed you stepped away for a moment. Take your time!
+              </p>
+
+              <div className="bg-orange-50 border-2 border-orange-200 rounded-xl p-4 mb-6">
+                <div className="text-sm text-orange-700 mb-2">
+                  No activity detected for:
+                </div>
+                <div className="text-4xl font-bold text-orange-600">
+                  {pauseCountdown}s
+                </div>
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  setIsPaused(false)
+                  setShowPauseOverlay(false)
+                  lastActivityRef.current = Date.now()
+                }}
+                className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg text-lg"
+              >
+                ▶️ Resume Learning
+              </motion.button>
+
+              <div className="mt-4 text-sm text-gray-500">
+                Click anywhere or move your mouse to resume
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Pause Warning (countdown before auto-pause) */}
+      <AnimatePresence>
+        {pauseCountdown > 0 && pauseCountdown <= 3 && !isPaused && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-50"
+          >
+            <div className="bg-orange-500 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3">
+              <div className="text-2xl">⚠️</div>
+              <div className="font-bold">
+                Pausing in {pauseCountdown}s... Move to stay active!
+              </div>
             </div>
           </motion.div>
         )}

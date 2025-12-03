@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAppStore } from '@/store/appStore'
 import confetti from 'canvas-confetti'
+import TextToSpeech from '@/components/TextToSpeech'
+import AIGuru from '@/components/AIGuru'
 
 export default function LessonViewer({ lesson, onComplete }) {
   const { addPoints } = useAppStore()
@@ -55,6 +57,37 @@ export default function LessonViewer({ lesson, onComplete }) {
   const slide = lesson.slides[currentSlide]
   const progress = ((currentSlide + 1) / lesson.slides.length) * 100
 
+  // Extract text content from current slide for text-to-speech
+  const getSlideText = () => {
+    let text = slide.title ? slide.title + '. ' : ''
+
+    if (slide.content) {
+      text += slide.content
+    }
+
+    if (slide.problem) {
+      text += ' Problem: ' + slide.problem
+    }
+
+    if (slide.steps && slide.steps.length > 0) {
+      text += ' Steps: ' + slide.steps.join('. ')
+    }
+
+    if (slide.solution) {
+      text += ' Solution: ' + slide.solution
+    }
+
+    if (slide.scenario) {
+      text += ' Scenario: ' + slide.scenario
+    }
+
+    if (slide.explanation) {
+      text += ' ' + slide.explanation
+    }
+
+    return text
+  }
+
   if (showQuiz) {
     return (
       <div className="min-h-screen p-4 md:p-8 bg-gradient-to-br from-purple-50 to-blue-50">
@@ -64,9 +97,15 @@ export default function LessonViewer({ lesson, onComplete }) {
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-xl shadow-2xl p-8"
           >
-            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-              Quick Check! 🎯
-            </h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-3xl font-bold text-gray-800">
+                Quick Check! 🎯
+              </h2>
+              <TextToSpeech
+                text={lesson.miniQuiz.question + ' Options: ' + lesson.miniQuiz.options.join(', ')}
+                rate={0.85}
+              />
+            </div>
 
             <div className="bg-blue-50 rounded-lg p-6 mb-6">
               <p className="text-xl text-gray-800 mb-6">{lesson.miniQuiz.question}</p>
@@ -106,6 +145,12 @@ export default function LessonViewer({ lesson, onComplete }) {
             )}
           </motion.div>
         </div>
+
+        {/* AI Guru Assistant */}
+        <AIGuru
+          context={lesson.miniQuiz.question + ' Options: ' + lesson.miniQuiz.options.join(', ')}
+          pageType="quiz"
+        />
       </div>
     )
   }
@@ -116,13 +161,20 @@ export default function LessonViewer({ lesson, onComplete }) {
         {/* Header */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
-            <div>
+            <div className="flex-1">
               <h1 className="text-3xl font-bold text-gray-800">{lesson.title}</h1>
               <p className="text-gray-600 mt-1">{lesson.subtitle}</p>
             </div>
-            <div className="text-right">
-              <div className="text-sm text-gray-600">Slide {currentSlide + 1} of {lesson.slides.length}</div>
-              <div className="text-2xl font-bold text-blue-600">+20 XP</div>
+            <div className="flex items-center gap-4">
+              <TextToSpeech
+                text={getSlideText()}
+                rate={0.85}
+                key={currentSlide}
+              />
+              <div className="text-right">
+                <div className="text-sm text-gray-600">Slide {currentSlide + 1} of {lesson.slides.length}</div>
+                <div className="text-2xl font-bold text-blue-600">+20 XP</div>
+              </div>
             </div>
           </div>
 
@@ -275,6 +327,9 @@ export default function LessonViewer({ lesson, onComplete }) {
           </button>
         </div>
       </div>
+
+      {/* AI Guru Assistant */}
+      <AIGuru context={getSlideText()} pageType="lesson" />
     </div>
   )
 }

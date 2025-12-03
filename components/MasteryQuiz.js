@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEnhancedStore } from '@/store/enhancedAppStore'
 import confetti from 'canvas-confetti'
+import TextToSpeech from '@/components/TextToSpeech'
+import AIGuru from '@/components/AIGuru'
 
 // Question bank by chapter
 const QUIZ_QUESTIONS = {
@@ -255,7 +257,14 @@ export default function MasteryQuiz({ chapterId, onComplete }) {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Mastery Quiz</h1>
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-3xl font-bold text-gray-800">Mastery Quiz</h1>
+            <TextToSpeech
+              text={question.question + ' Options: ' + question.options.join(', ')}
+              rate={0.85}
+              key={currentQuestion}
+            />
+          </div>
           <p className="text-gray-600 mb-4">
             Answer all questions to test your mastery. You need 80% to pass!
           </p>
@@ -351,6 +360,12 @@ export default function MasteryQuiz({ chapterId, onComplete }) {
             )}
           </motion.div>
         </AnimatePresence>
+
+        {/* AI Guru Assistant */}
+        <AIGuru
+          context={question.question + ' Options: ' + question.options.join(', ')}
+          pageType="quiz"
+        />
       </div>
     </div>
   )

@@ -6,6 +6,8 @@ import { useEnhancedStore } from '@/store/enhancedAppStore'
 import ChocolateBarActivity from './ChocolateBarActivity'
 import VoiceInput from './VoiceInput'
 import Timer from './Timer'
+import TextToSpeech from './TextToSpeech'
+import AIGuru from './AIGuru'
 
 export default function Introduction() {
   const { setPhase } = useEnhancedStore()
@@ -44,16 +46,7 @@ export default function Introduction() {
     setPhase('profile')
   }
 
-  const speakPrompt = () => {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(
-        "Fractions represent parts of a whole. The numerator is the top number showing how many parts we have, and the denominator is the bottom number showing the total equal parts. For example, 3/4 means 3 out of 4 equal parts. Fractions help us share things fairly, like dividing a chocolate bar among friends. Now let's practice by shading 3/4 of the rectangle!"
-      )
-      utterance.rate = 0.85
-      utterance.pitch = 1
-      window.speechSynthesis.speak(utterance)
-    }
-  }
+  const introText = "Fractions represent parts of a whole. The numerator is the top number showing how many parts we have, and the denominator is the bottom number showing the total equal parts. For example, 3/4 means 3 out of 4 equal parts. Fractions help us share things fairly, like dividing a chocolate bar among friends. Now let's practice by shading 3/4 of the rectangle!"
 
   return (
     <div className="min-h-screen p-4 md:p-8">
@@ -69,16 +62,11 @@ export default function Introduction() {
             <h1 className="text-3xl md:text-4xl font-bold text-gray-800">
               Introduction: Fractions in Everyday Life
             </h1>
-            <button
-              onClick={speakPrompt}
-              className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
-              aria-label="Read aloud"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-              </svg>
-              Listen
-            </button>
+            <TextToSpeech
+              text={introText}
+              rate={0.85}
+              pitch={1}
+            />
           </div>
 
           <motion.div
@@ -154,6 +142,9 @@ export default function Introduction() {
                 : 'Continue to Activities →'}
           </motion.button>
         </motion.div>
+
+        {/* AI Guru Assistant */}
+        <AIGuru context={introText} pageType="lesson" />
       </div>
     </div>
   )
