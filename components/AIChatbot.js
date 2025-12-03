@@ -47,6 +47,7 @@ export default function AIChatbot({ chapterId = 'fractions', isOpen, onClose }) 
 
     try {
       // Call API
+      console.log('Sending message to API:', userMessage)
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -60,11 +61,16 @@ export default function AIChatbot({ chapterId = 'fractions', isOpen, onClose }) 
         })
       })
 
+      console.log('API Response status:', response.status)
+
       if (!response.ok) {
-        throw new Error('Failed to get response')
+        const errorData = await response.json()
+        console.error('API Error:', errorData)
+        throw new Error(errorData.error || 'Failed to get response')
       }
 
       const data = await response.json()
+      console.log('API Response:', data)
 
       // Add AI response to chat
       setMessages([
@@ -72,12 +78,21 @@ export default function AIChatbot({ chapterId = 'fractions', isOpen, onClose }) 
         { role: 'assistant', content: data.message }
       ])
     } catch (error) {
-      console.error('Chat error:', error)
+      console.error('Chat error details:', error)
+
+      // Show specific error message
+      let errorMessage = "Sorry, I'm having trouble connecting right now. "
+      if (error.message.includes('API key')) {
+        errorMessage = "⚠️ OpenAI API key not configured. Please add your API key to .env.local file. See AI_CHATBOT_SETUP.md for instructions."
+      } else if (error.message.includes('Failed to fetch')) {
+        errorMessage = "❌ Network error. Please check your internet connection."
+      }
+
       setMessages([
         ...newMessages,
         {
           role: 'assistant',
-          content: "Sorry, I'm having trouble connecting right now. Please try again in a moment! 😊"
+          content: errorMessage
         }
       ])
     } finally {

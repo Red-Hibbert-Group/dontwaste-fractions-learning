@@ -62,9 +62,20 @@ export async function POST(request) {
   try {
     const { message, chapterId, studentName, conversationHistory } = await request.json()
 
+    console.log('Chat API called:', { message, chapterId, studentName, hasHistory: !!conversationHistory })
+
     if (!OPENAI_API_KEY) {
+      console.error('OpenAI API key is not configured')
       return NextResponse.json(
-        { error: 'OpenAI API key not configured' },
+        { error: 'OpenAI API key not configured. Please add OPENAI_API_KEY to your .env.local file.' },
+        { status: 500 }
+      )
+    }
+
+    if (!OPENAI_API_KEY.startsWith('sk-')) {
+      console.error('Invalid OpenAI API key format')
+      return NextResponse.json(
+        { error: 'Invalid OpenAI API key format. Key should start with "sk-"' },
         { status: 500 }
       )
     }
@@ -86,6 +97,8 @@ export async function POST(request) {
     ]
 
     // Call OpenAI API
+    console.log('Calling OpenAI API with', messages.length, 'messages')
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -102,16 +115,30 @@ export async function POST(request) {
       })
     })
 
+    console.log('OpenAI API response status:', response.status)
+
     if (!response.ok) {
       const error = await response.json()
       console.error('OpenAI API Error:', error)
+
+      let errorMessage = 'Failed to get response from AI'
+      if (response.status === 401) {
+        errorMessage = 'Invalid OpenAI API key. Please check your API key in .env.local'
+      } else if (response.status === 429) {
+        errorMessage = 'Rate limit exceeded or no credits available. Please check your OpenAI account.'
+      } else if (error.error?.message) {
+        errorMessage = error.error.message
+      }
+
       return NextResponse.json(
-        { error: 'Failed to get response from AI' },
+        { error: errorMessage },
         { status: response.status }
       )
     }
 
     const data = await response.json()
+    console.log('OpenAI API success, tokens used:', data.usage?.total_tokens)
+
     const aiMessage = data.choices[0].message.content
 
     return NextResponse.json({
