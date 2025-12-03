@@ -20,14 +20,14 @@ export default function LandingPage() {
           transition={{ delay: 0.2, type: "spring" }}
         >
           <h1 className="text-5xl md:text-6xl font-bold text-gray-800 mb-4">
-            Exploring Fractions in
-            <span className="text-blue-600 block mt-2">Everyday Life</span>
+            Master Math with
+            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent block mt-2">TimeBack Learning</span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
-            An adaptive learning journey for Grades 5-6
+          <p className="text-xl text-gray-600 mb-4">
+            An adaptive, gamified learning platform for Grades 1-8
           </p>
-          <p className="text-lg text-gray-500 mb-12">
-            Meru International School
+          <p className="text-lg text-gray-500 mb-8">
+            Personalized paths • XP & Levels • Streak tracking • Mastery-based progression
           </p>
         </motion.div>
 
@@ -39,26 +39,59 @@ export default function LandingPage() {
         >
           <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
             <h2 className="text-2xl font-semibold mb-4 text-gray-800">
-              What You&apos;ll Learn
+              4 Complete Math Chapters
             </h2>
-            <ul className="text-left space-y-2 text-gray-600">
-              <li className="flex items-start">
-                <span className="text-blue-500 mr-2">✓</span>
-                <span>Understanding fractions through visual representations</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-blue-500 mr-2">✓</span>
-                <span>Equivalent fractions and operations</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-blue-500 mr-2">✓</span>
-                <span>Real-world applications in everyday life</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-blue-500 mr-2">✓</span>
-                <span>Interactive activities with instant feedback</span>
-              </li>
-            </ul>
+            <div className="grid grid-cols-2 gap-4 text-left">
+              <div className="flex items-center">
+                <span className="text-3xl mr-3">🍕</span>
+                <div>
+                  <div className="font-semibold text-gray-800">Fractions</div>
+                  <div className="text-sm text-gray-500">Parts & wholes</div>
+                </div>
+              </div>
+              <div className="flex items-center">
+                <span className="text-3xl mr-3">🔢</span>
+                <div>
+                  <div className="font-semibold text-gray-800">Decimals</div>
+                  <div className="text-sm text-gray-500">Place values</div>
+                </div>
+              </div>
+              <div className="flex items-center">
+                <span className="text-3xl mr-3">📊</span>
+                <div>
+                  <div className="font-semibold text-gray-800">Percentages</div>
+                  <div className="text-sm text-gray-500">Out of 100</div>
+                </div>
+              </div>
+              <div className="flex items-center">
+                <span className="text-3xl mr-3">🧮</span>
+                <div>
+                  <div className="font-semibold text-gray-800">Number Sense</div>
+                  <div className="text-sm text-gray-500">Mental math</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-gray-200">
+              <div className="text-sm text-gray-600 space-y-2">
+                <div className="flex items-center">
+                  <span className="text-blue-500 mr-2">⭐</span>
+                  <span>Earn XP and level up as you learn</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-blue-500 mr-2">🔥</span>
+                  <span>Build daily streaks for consistency</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-blue-500 mr-2">🎯</span>
+                  <span>Complete lessons & activities to unlock chapters</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-blue-500 mr-2">🎓</span>
+                  <span>Pass mastery quizzes to progress</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           <motion.button
@@ -71,7 +104,7 @@ export default function LandingPage() {
           </motion.button>
 
           <p className="text-sm text-gray-500 mt-4">
-            Session Duration: 25-30 minutes
+            Start with a quick assessment • Learn at your own pace • Track your progress
           </p>
         </motion.div>
       </motion.div>

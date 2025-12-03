@@ -34,14 +34,7 @@ export default function Introduction() {
     }
   }, [targetTime])
 
-  // Separate effect for updating time spent
-  useEffect(() => {
-    const interval = setInterval(() => {
-      updateTimeSpent()
-    }, 5000) // Update every 5 seconds instead of every second
-
-    return () => clearInterval(interval)
-  }, [updateTimeSpent])
+  // No need for separate time tracking - using enhanced store's activity logging
 
   const handleActivityComplete = () => {
     setIsComplete(true)
