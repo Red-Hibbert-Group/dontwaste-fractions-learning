@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import FractionPizzaBuilder from './games/FractionPizzaBuilder'
 import FractionWar from './games/FractionWar'
+import EquivalentFractionsMatcher from './activities/EquivalentFractionsMatcher'
+import FractionComparison from './activities/FractionComparison'
 
 const GAMES = [
   {
@@ -21,11 +23,25 @@ const GAMES = [
     color: 'bg-purple-500',
   },
   {
+    id: 'equivalent-matcher',
+    name: '🎯 Equivalent Matcher',
+    description: 'Match fractions that have the same value',
+    component: EquivalentFractionsMatcher,
+    color: 'bg-blue-500',
+  },
+  {
+    id: 'fraction-comparison',
+    name: '⚖️ Comparison Challenge',
+    description: 'Compare fractions and determine which is larger',
+    component: FractionComparison,
+    color: 'bg-green-500',
+  },
+  {
     id: 'bingo',
-    name: '🎯 Fraction Bingo',
+    name: '🎲 Fraction Bingo',
     description: 'Mark fractions on your bingo card',
     component: null, // TODO: Implement
-    color: 'bg-blue-500',
+    color: 'bg-pink-500',
     comingSoon: true,
   },
   {
@@ -33,7 +49,7 @@ const GAMES = [
     name: '🎰 Spin to Win',
     description: 'Spin the wheel and compare fractions',
     component: null, // TODO: Implement
-    color: 'bg-green-500',
+    color: 'bg-yellow-500',
     comingSoon: true,
   },
 ]
