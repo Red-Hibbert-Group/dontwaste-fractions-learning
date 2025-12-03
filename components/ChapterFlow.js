@@ -6,6 +6,7 @@ import { useEnhancedStore } from '@/store/enhancedAppStore'
 import { getChapterById } from '@/data/curriculum'
 import LessonViewer from './lessons/LessonViewer'
 import MasteryQuiz from './MasteryQuiz'
+import AIChatbot from './AIChatbot'
 import { fractionsLesson } from '@/data/lessons/fractionsLesson'
 
 // Import existing activities
@@ -32,6 +33,7 @@ export default function ChapterFlow({ chapterId, onComplete }) {
   const { curriculum, completeLesson, completeActivity, setMastery } = useEnhancedStore()
   const [currentStep, setCurrentStep] = useState('menu') // menu, lesson, activity, mastery
   const [selectedActivity, setSelectedActivity] = useState(null)
+  const [isChatOpen, setIsChatOpen] = useState(false)
 
   const chapter = getChapterById(chapterId)
   const chapterProgress = curriculum[chapterId]
@@ -327,6 +329,26 @@ export default function ChapterFlow({ chapterId, onComplete }) {
           </motion.div>
         )}
       </div>
+
+      {/* Floating AI Helper Button */}
+      <motion.button
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => setIsChatOpen(true)}
+        className="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl hover:shadow-3xl transition-shadow z-40"
+      >
+        <span>🤖</span>
+        <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
+      </motion.button>
+
+      {/* AI Chatbot */}
+      <AIChatbot
+        chapterId={chapterId}
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+      />
     </div>
   )
 }
